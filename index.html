@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoolFix</title>
+
+    <!-- VueJS -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    <!-- Axios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
+
+    <!-- My Style -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <div id="root">
+
+        <div class="outer-search-form">
+            <label for="search-title"></label>
+            <input v-model="userQuery" type="text" id="search-title">
+        </div>
+
+        <div class="outer-button">
+            <button @click="searchMovie()" >Cerca</button>
+        </div>
+
+        <div class="outer-search-result">
+            <ul class="movie-list">
+                <li class="single-movie-box" v-for="movie in searchResults">
+                    <ul>
+                        <li><strong>Titolo</strong>:  {{movie.title}}</li>
+                        <li><strong>Titolo</strong> Originale: {{movie.original_title}} </li>
+                        <li><strong>Lingua</strong> : {{movie.original_language}}</li>
+                        <li><strong>Voto</strong>: {{movie.vote_average}} </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- My JS -->
+    <script src="JS/main.js"></script>
+</body>
+</html>

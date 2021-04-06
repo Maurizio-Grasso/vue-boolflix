@@ -1,0 +1,15 @@
+#root {
+    max-width: 1200px;
+    margin: auto; 
+    text-align: center; 
+}
+
+.movie-list {
+    list-style-type: none;
+    text-align: left;
+}
+
+.single-movie-box {
+    margin-bottom: 40px;
+    display: inline-block;
+}
