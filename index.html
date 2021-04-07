@@ -38,7 +38,7 @@
                     <ul>
                         <li><strong>Titolo</strong>:  {{movie.title}}</li>
                         <li><strong>Titolo Originale</strong>: {{movie.original_title}} </li>
-                        <li><strong>Lingua</strong> : {{ movie.country }}</li>
+                        <li><img :src="movie.poster_path" :alt="movie.title" class="movie-poster"></li>
                         <li v-if="movie.rating != 0"><strong>Voto</strong>: <i v-for="rate in movie.rating" class="fas fa-star"></i> <i v-for="rate in (5 - movie.rating)" class="far fa-star"></i> </li>
                         <li v-if="(movie.flagLink)"> <img :src="movie.flagLink" alt="flag" class="country-flag"> </li>
                     </ul>

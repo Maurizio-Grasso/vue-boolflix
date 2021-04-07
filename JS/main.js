@@ -13,7 +13,7 @@ var app = new Vue ({
                 { params: {
                     api_key : this.apiKey ,
                     query : this.userQuery ,
-                    page : 1
+                    page : 1    // Ma tutte le altre pagine che fine fanno?
                     }
                 })
                 .then( (response) =>  {                       
@@ -45,7 +45,15 @@ var app = new Vue ({
             
             newMovie = {rating : Math.ceil(movie.vote_average / 2)};    // trasformo il voto in un valore intero da 1 a 5
             newMovie.flagLink = ''; // Inizializzo anche il link alla bandierina, che sarà ricavato in seguito
-            
+            if(movie.poster_path == null){
+                // Se non viene fornito un poster tramite API
+                newMovie.poster_path = 'img/image-placeholder.png';                
+            }
+            else {  
+                //... in caso contrario
+                newMovie.poster_path = `https://image.tmdb.org/t/p/w185${movie.poster_path}`;
+            }
+
             if (category == 'tv') {
                 // Se stiamo lavorando sul titolo di una Serie TV
                 newMovie.title = movie.name;
