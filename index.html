@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BoolFix</title>
 
+    <title>BoolFix</title>
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+    
     <!-- VueJS -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 
@@ -16,26 +20,27 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    
+
     <div id="root">
 
         <div class="outer-search-form">
             <label for="search-title"></label>
-            <input v-model="userQuery" type="text" id="search-title">
+            <input v-model="userQuery" @keyup.13="searchTitle('movie')" type="text" id="search-title">
         </div>
 
         <div class="outer-button">
-            <button @click="searchMovie()" >Cerca</button>
+            <button @click="searchTitle('movie')" >Cerca</button>
         </div>
 
         <div class="outer-search-result">
             <ul class="movie-list">
-                <li class="single-movie-box" v-for="movie in searchResults">
+                <li class="single-movie-box" v-for="movie in movieList">
                     <ul>
                         <li><strong>Titolo</strong>:  {{movie.title}}</li>
-                        <li><strong>Titolo</strong> Originale: {{movie.original_title}} </li>
-                        <li><strong>Lingua</strong> : {{movie.original_language}}</li>
-                        <li><strong>Voto</strong>: {{movie.vote_average}} </li>
+                        <li><strong>Titolo Originale</strong>: {{movie.original_title}} </li>
+                        <li><strong>Lingua</strong> : {{ movie.country }}</li>
+                        <li v-if="movie.rating != 0"><strong>Voto</strong>: <i v-for="rate in movie.rating" class="fas fa-star"></i> <i v-for="rate in (5 - movie.rating)" class="far fa-star"></i> </li>
+                        <li v-if="(movie.flagLink)"> <img :src="movie.flagLink" alt="flag" class="country-flag"> </li>
                     </ul>
                 </li>
             </ul>

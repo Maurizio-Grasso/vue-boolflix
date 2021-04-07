@@ -4,12 +4,20 @@
     text-align: center; 
 }
 
-.movie-list {
+ul {
     list-style-type: none;
     text-align: left;
+}
+
+ul li {
+    margin-bottom: 20px;
 }
 
 .single-movie-box {
     margin-bottom: 40px;
     display: inline-block;
+}
+
+.country-flag {
+    max-width: 50px;
 }
