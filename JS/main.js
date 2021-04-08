@@ -13,19 +13,20 @@ var app = new Vue ({
                 { params: {
                     api_key : this.apiKey ,
                     query : this.userQuery ,
+                    language : 'it-IT' ,
                     page : 1    // Ma tutte le altre pagine che fine fanno?
                     }
                 })
-                .then( (response) =>  {                       
-                    response.data.results.forEach((movie) => {                        
-                        //  Per ogni titolo restituito tramie API lancia il metodo addItem 
+                .then( (response) =>  {
+                    response.data.results.forEach((movie) => {
+                        //  Per ogni titolo restituito tramie API lancia il metodo addItem
                         //  il quale  si occupa di inserirne i relativi dati nell'array
                         this.addItem(movie , category);
-                    });                    
+                    });
                 });
 
                 if(category == 'movie') {
-                    // Se la categoria sulla quale abbiamo lavorato è 'movie' 
+                    // Se la categoria sulla quale abbiamo lavorato è 'movie'
                     // Richiama ricorsivamente la funzione passando come argomento 'tv'
                     // Così da ripetere la stessa ricerca anche per le serie televisive
                     this.searchTitle('tv');
@@ -33,25 +34,30 @@ var app = new Vue ({
                 else {
                     this.userQuery = '';
                 }
-                
             } ,
 
         addItem(movie , category) {
         //  Questo medodo si occupa di aggiungere all'array principale un singolo titolo
         //  l'argomento 'movie' contiene i dati ancora grezzi passati dalle API
         //  l'argomento 'category' può essere uguale a 'movie' o 'tv' a seconda che si tratti di film o serie TV
-            
+
             var newMovie;   // Dichiaro variabile che conterrà l'oggetto temporaneo
-            
+
             newMovie = {rating : Math.ceil(movie.vote_average / 2)};    // trasformo il voto in un valore intero da 1 a 5
             newMovie.flagLink = ''; // Inizializzo anche il link alla bandierina, che sarà ricavato in seguito
+            newMovie.plot = movie.overview;
+            
+            if(newMovie.plot.length > 400) {
+                //  Se la trama supera i 400 caratteri ne creo una versione tagliata, per evitare di mandare in overflow il suo box
+                newMovie.truncatedPlot = newMovie.plot.substring(0, 400) + '...';
+            }
             if(movie.poster_path == null){
                 // Se non viene fornito un poster tramite API
-                newMovie.poster_path = 'img/image-placeholder.png';                
+                newMovie.poster_path = 'img/image-placeholder.png';
             }
-            else {  
+            else {
                 //... in caso contrario
-                newMovie.poster_path = `https://image.tmdb.org/t/p/w185${movie.poster_path}`;
+                newMovie.poster_path = `https://image.tmdb.org/t/p/w342${movie.poster_path}`;
             }
 
             if (category == 'tv') {
@@ -75,27 +81,27 @@ var app = new Vue ({
                 // Devo arrangiarmi col campo 'lingua originale', benché questo dato sia spesso ambiguo
                 newMovie.country = movie.original_language;
             }
-            
+
             // Che si tratti di un film o di una serie, i dati sono adesso omogenei
 
-            this.movieList.push(newMovie);  // Aggiungo il titolo all'array principale            
+            this.movieList.push(newMovie);  // Aggiungo il titolo all'array principale
             this.getFlag(this.movieList.length - 1);    // aggiungo bandiera all'ultimo elemento
         },
 
         getFlag(index) {
         //  Questo metodo si occupa di ricavare il link ad una bandierina che corrisponde al Paese di origine del titolo
         //  Oppure coerente con la sua lingua originale (nel caso in cui il Paese di origine fosse ignoto)
-            
+
             var langString = this.movieList[index].country;
-        
-            if((langString == 'en') || (langString == 'EN')) {                
-                // 'EN' non corrisponde ad un Paese specifico ma è la lingua più frequente 
+
+            if((langString == 'en') || (langString == 'EN')) {
+                // 'EN' non corrisponde ad un Paese specifico ma è la lingua più frequente
                 //  Gestisco questo caso separatamente con una bandierina a metà fra quella inglese e quella statunitense
                 this.movieList[index].flagLink = "https://upload.wikimedia.org/wikipedia/commons/a/a6/Us-uk.svg";
             }
-            else {                
+            else {
                 //  ...altrimenti Cerco il link alla bandierina tramite il servizio RestCountries:
-                axios.get('https://restcountries.eu/rest/v2/alpha/'+langString).then( (response) =>  {                 
+                axios.get('https://restcountries.eu/rest/v2/alpha/'+langString).then( (response) =>  {
                     this.movieList[index].flagLink = response.data.flag;
                 }).catch( (error) => {  // Se la bandierina non si trova...
                     console.log('Bandierina non trovata: '+ error);

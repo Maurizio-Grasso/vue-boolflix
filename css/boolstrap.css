@@ -1,0 +1,214 @@
+/*  BoolStrap v.0.2.1 Beta */
+
+/*  BoolStrap is a FREE, lightweight, open source, 100% non-responsive CSS framework */
+/*  Feel free to use it (at your own risk) for any project! */
+
+/*
+################
+Reset & Defaults
+################
+*/
+
+:root {
+    font-size: 62.5%; 
+    --color-primary: orange;
+    --spacing-standard: 1rem;
+    --spacing-more: calc( var(--spacing-standard) * 2 );
+}
+
+* , 
+*::after ,
+*::before {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.clearfix::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+body {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+
+a:link ,
+a:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style-type: none;
+}
+
+button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+/*
+######
+Layout
+######
+*/
+
+.flex-container {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.outer-wrapper {
+    min-height: 100vh;
+    margin: auto;
+}
+
+.container-fluid {
+    width:100%;
+    margin:auto;
+}
+
+/*
+#######
+Spacing
+#######
+*/
+
+.padding-standard { padding: var(--spacing-standard);}
+.padding-t-standard { padding-top: var(--spacing-standard);}
+.padding-r-standard { padding-right: var(--spacing-standard);}
+.padding-b-standard { padding-bottom: var(--spacing-standard);}
+.padding-l-standard { padding-left: var(--spacing-standard);}
+
+.padding-more { padding: var(--spacing-more);}
+.padding-t-more { padding-top: var(--spacing-more);}
+.padding-r-more { padding-right: var(--spacing-more);}
+.padding-b-more { padding-bottom: var(--spacing-more);}
+.padding-l-more { padding-left: var(--spacing-more);}
+
+.margin-standard { margin: var(--spacing-standard);}
+.margin-t-standard { margin-top: var(--spacing-standard);}
+.margin-r-standard { margin-right: var(--spacing-standard);}
+.margin-b-standard { margin-bottom: var(--spacing-standard);}
+.margin-l-standard { margin-left: var(--spacing-standard);}
+
+.margin-more { margin: var(--spacing-more);}
+.margin-t-more { margin-top: var(--spacing-more);}
+.margin-r-more { margin-right: var(--spacing-more);}
+.margin-b-more { margin-bottom: var(--spacing-more);}
+.margin-l-more { margin-left: var(--spacing-more);}
+
+
+/*
+###########
+Positioning
+###########
+*/
+
+.set-relative {
+    position: relative;
+}
+
+.align-y {
+    /* Parent must be relative*/
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.align-x-y {
+    /* Parent must be relative*/
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50% , -50%);
+}
+
+.float-left { float:left;   }
+
+.float-right { float:right; }
+
+/*
+##########
+Typography
+##########
+*/
+
+h1 ,
+h2 ,
+h3 {
+    font-weight: 700; 
+}
+
+h1 { 
+    font-size: 3.5rem; 
+    line-height: 4.5rem;
+}
+
+h2 { 
+    font-size: 2.6rem; 
+    line-height: 3rem;
+}
+
+h3 { 
+    font-size: 2.1rem; 
+    line-height: 2.5rem;
+}
+
+h4 { font-size: 1.8rem; }
+h5 { font-size: 1.6rem; }
+h6 { font-size: 1.5rem; }
+
+p {
+    margin-bottom: var(--spacing-standard);
+    margin-top: var(--spacing-standard);
+}
+
+/*
+#########
+Utilities
+#########
+*/
+
+.bg-white { background-color: white; }
+.bg-primary { background-color: var(--color-primary); }
+
+.text-center {    text-align: center; }
+.text-left {    text-align: left; }
+.text-right {    text-align: right; }
+
+.text-smaller {    font-size: .85em; }
+
+.text-uppercase { text-transform: uppercase;}
+.text-capitalized { text-transform: capitalize;}
+
+.text-primary { color: var(--color-primary); }
+.text-white { color: white; }
+.text-black { color: black; }
+
+
+.btn {
+    padding: var(--spacing-standard) calc(var(--spacing-standard) * 2 ) var(--spacing-standard);
+    border-radius: var(--spacing-standard);
+}
+
+.btn.btn-large {
+    padding: calc(var(--spacing-standard) * 2 ) calc(var(--spacing-standard) * 4 ) calc(var(--spacing-standard) * 2 );
+    font-size: 2em;
+    line-height: 1.2em;
+}
+
+.btn.btn-primary {
+    color: white;
+    background-color: var(--color-primary);
+}
+
+.inline-list li { display: inline-block; }
+
+.cursor-pointer { cursor: pointer;}

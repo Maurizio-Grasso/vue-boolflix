@@ -1,23 +1,92 @@
-#root {
-    max-width: 1200px;
-    margin: auto; 
-    text-align: center; 
+
+body {
+    background-color: #141414;
+    font-family: 'Lato', sans-serif;
+    font-size: 1.8rem;
+    line-height: 2.2rem;
 }
 
-ul {
-    list-style-type: none;
-    text-align: left;
+/*  HEADER */
+
+.header.flex-container {
+    justify-content: space-evenly;
 }
 
-ul li {
-    margin-bottom: 20px;
+.header img.header-logo {
+    max-height: 6rem;
 }
 
-.single-movie-box {
-    margin-bottom: 40px;
-    display: inline-block;
+/*  CARD CONTAINER OUTER    */
+
+ul.movie-list.flex-container {
+    flex-wrap: wrap;
 }
 
-.country-flag {
-    max-width: 50px;
+/*  SINGLE CARD */
+
+li.single-movie-box {
+    flex: 0 0 342px;    
+    height: 500px;
+    box-shadow: 0 0 1rem rgba(255, 255, 255, 0.1);
+    border-radius: .5rem;
+    overflow: hidden;
+}
+
+/* MOVIE POSTER */
+
+img.movie-poster {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #333333;
+    object-fit: cover;
+    transition: opacity .5s;
+}
+
+.single-movie-box:hover img.movie-poster {
+    opacity: 0.05;
+}
+
+/* MOVIE DATA */
+
+.single-movie-box .movie-data {
+    opacity: 0;
+    transition: opacity .5s;
+
+    position: absolute;
+    z-index: 3;
+    
+    flex-direction: column;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    
+    height: 100%;
+}
+
+.single-movie-box:hover .movie-data {
+    opacity: 1;
+}
+
+/*  FLAGS */
+
+.movie-country-flag {
+    max-height: 2.2rem;
+    vertical-align: middle;
+    background-color: rgb(255, 255, 255);
+}
+
+/*  STARS   */
+
+.movie-rating i {
+    color: #ffc600;
+}
+
+/*  PLOT   */
+
+li.movie-plot-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex: 1 0 auto;
 }

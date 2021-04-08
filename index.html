@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,36 +16,68 @@
     <!-- Axios -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
 
+    <!-- Google Font Lato -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"> 
+
     <!-- My Style -->
+    <link rel="stylesheet" href="css/boolstrap.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <div id="root">
 
-        <div class="outer-search-form">
-            <label for="search-title"></label>
-            <input v-model="userQuery" @keyup.13="searchTitle('movie')" type="text" id="search-title">
-        </div>
+        <header class="header flex-container">
+            <div class="outer-logo">
+                <img src="img/logo-boolflix.png" alt="logo boolflix" class="header-logo">
+            </div>
 
-        <div class="outer-button">
-            <button @click="searchTitle('movie')" >Cerca</button>
-        </div>
+            <div class="outer-search-form">
+                <label for="search-title"></label>
+                <input v-model="userQuery" @keyup.13="searchTitle('movie')" type="text" id="search-title">
+                <button @click="searchTitle('movie')" >Cerca</button>
+            </div>
+            
 
-        <div class="outer-search-result">
-            <ul class="movie-list">
-                <li class="single-movie-box" v-for="movie in movieList">
-                    <ul>
-                        <li><strong>Titolo</strong>:  {{movie.title}}</li>
-                        <li><strong>Titolo Originale</strong>: {{movie.original_title}} </li>
-                        <li><img :src="movie.poster_path" :alt="movie.title" class="movie-poster"></li>
-                        <li v-if="movie.rating != 0"><strong>Voto</strong>: <i v-for="rate in movie.rating" class="fas fa-star"></i> <i v-for="rate in (5 - movie.rating)" class="far fa-star"></i> </li>
-                        <li v-if="(movie.flagLink)"> <img :src="movie.flagLink" alt="flag" class="country-flag"> </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
+        </header>
+            
+        <main class="main">            
+
+            <ul class="movie-list flex-container inline-list">
+
+                <li v-for="movie in movieList" class="single-movie-box  set-relative margin-more">
+                    
+                    <img :src="movie.poster_path" :alt="movie.title" class="movie-poster">
+
+                    <ul class="movie-data flex-container text-white padding-standard">
+                        
+                        <li class="margin-b-more"> 
+                            <img class="movie-country-flag float-right margin-l-standard" v-if="(movie.flagLink)" :src="movie.flagLink" alt="flag"> 
+                            <span class="movie-title"><strong>Titolo</strong>: {{movie.title}}</span>
+                        </li>
+
+                        <li v-if="(movie.title != movie.original_title)" class="margin-b-more">
+                            <span class="single-movie-original-title"><strong>Titolo Originale</strong>: {{movie.original_title}} </span>
+                        </li>
+
+                        <li class="movie-rating margin-b-more" v-if="movie.rating != 0">
+                            <span class="margin-r-standard"><strong>Voto</strong>:</span><i v-for="rate in movie.rating" class="fas fa-star"></i><i v-for="rate in (5 - movie.rating)" class="far fa-star"></i>
+                        </li>
+                        
+                        <li v-if="(movie.plot)" class="movie-plot-container">
+                            <p v-if="(movie.truncatedPlot)" class="movie-plot">{{movie.truncatedPlot}}</p>
+                            <p v-else class="movie-plot">{{movie.plot}}</p>
+                        </li>
+
+                    </ul><!-- Movie Data END-->
+                </li><!-- Single Movie Card END-->
+
+            </ul><!-- Outer Movie List END-->            
+        </main>
+
+    </div><!-- Root END -->
+
     <!-- My JS -->
     <script src="JS/main.js"></script>
 </body>
