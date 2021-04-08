@@ -28,52 +28,85 @@
 
     <div id="root">
 
-        <header class="header flex-container">
-            <div class="outer-logo">
-                <img src="img/logo-boolflix.png" alt="logo boolflix" class="header-logo">
-            </div>
+        <header class="header">
+            <div class="inner-header inner-wrapper flex-container padding-standard">
 
-            <div class="outer-search-form">
-                <label for="search-title"></label>
-                <input v-model="userInput" @keyup.13="searchTitle('all' , userInput)" type="text" id="search-title">
-                <button @click="searchTitle('all' , userInput)" >Cerca</button>
-            </div>
+                <div class="outer-logo">
+                    <img src="img/logo-boolflix.png" alt="logo boolflix" class="header-logo">
+                </div>
+                
+                <nav class="header-menu-nav margin-l-more text-white text-capitalized container-fluid">
+                    <ul class="flex-container hide-on-mobile">
+                        <li class="margin-l-more">home</li>
+                        <li class="margin-l-more">serie TV</li>
+                        <li class="margin-l-more">Film</li>
+                        <li class="margin-l-more">Nuovi e popolari</li>
+                        <li class="margin-l-more">la mia lista</li>
+                    </ul>
+
+                    <div class="outer-hamburger-menu hide-on-desktop margin-l-standard text-bigger">
+                        <i class="text-bigger cursor-pointer fas fa-bars"></i>
+                    </div>
+
+                </nav>
+
+                <nav class="header-menu-nav hide-on-desktop text-white">
+                </nav>
+                
+                <div class="outer-search-form flex-container">
+                    <input 
+                    v-model="userInput" 
+                    @keyup.13="searchTitle('all' , userInput)" 
+                    class="padding-l-standard text-white"
+                    type="text" 
+                    id="search-title" 
+                    placeholder="Cerca film o serie TV">
+                    
+                    <button 
+                    class="search-button padding-l-standard padding-r-standard text-center" 
+                    @click="searchTitle('all' , userInput)" >
+                    <i class="fas fa-search"></i>
+                    </button>
+
+                </div><!-- Search Form Outer END -->
             
+            </div><!-- Inner Header END -->
 
         </header>
             
         <main class="main">            
+            <div class="inner-main inner-wrapper">
+                <ul class="movie-list flex-container inline-list">
 
-            <ul class="movie-list flex-container inline-list">
-
-                <li v-for="movie in movieList" class="single-movie-box  set-relative margin-more">
-                    
-                    <img :src="movie.poster_path" :alt="movie.title" class="movie-poster">
-
-                    <ul class="movie-data flex-container text-white padding-standard">
+                    <li v-for="(movie , index) in movieList" class="single-movie-box  set-relative margin-standard">
                         
-                        <li class="margin-b-more"> 
-                            <img class="movie-country-flag float-right margin-l-standard" v-if="(movie.flagLink)" :src="movie.flagLink" alt="flag"> 
-                            <span class="movie-title"><strong>Titolo</strong>: {{movie.title}}</span>
-                        </li>
+                        <img :src="movie.poster_path" :alt="movie.title" class="movie-poster">
 
-                        <li v-if="(movie.title != movie.original_title)" class="margin-b-more">
-                            <span class="single-movie-original-title"><strong>Titolo Originale</strong>: {{movie.original_title}} </span>
-                        </li>
+                        <ul class="movie-data flex-container text-white padding-standard">
+                            
+                            <li class="margin-b-more"> 
+                                <img class="movie-country-flag float-right margin-l-standard" v-if="(movie.flagLink)" :src="movie.flagLink" alt="flag"> 
+                                <span class="movie-title"><strong>Titolo</strong>: {{movie.title}}</span>
+                            </li>
 
-                        <li class="movie-rating margin-b-more" v-if="movie.rating != 0">
-                            <span class="margin-r-standard"><strong>Voto</strong>:</span><i v-for="rate in movie.rating" class="fas fa-star"></i><i v-for="rate in (5 - movie.rating)" class="far fa-star"></i>
-                        </li>
-                        
-                        <li v-if="(movie.plot)" class="movie-plot-container">
-                            <p v-if="(movie.truncatedPlot)" class="movie-plot">{{movie.truncatedPlot}}</p>
-                            <p v-else class="movie-plot">{{movie.plot}}</p>
-                        </li>
+                            <li v-if="(movie.title != movie.original_title)" class="margin-b-more">
+                                <span class="single-movie-original-title"><strong>Titolo Originale</strong>: {{movie.original_title}} </span>
+                            </li>
 
-                    </ul><!-- Movie Data END-->
-                </li><!-- Single Movie Card END-->
+                            <li class="movie-rating margin-b-more" v-if="movie.rating != 0">
+                                <span class="margin-r-standard"><strong>Voto</strong>:</span><i v-for="rate in movie.rating" class="fas fa-star"></i><i v-for="rate in (5 - movie.rating)" class="far fa-star"></i>
+                            </li>
+                            
+                            <li v-if="(movie.plot)" class="movie-plot-container">
+                                <p v-if="(movie.truncatedPlot)" class="movie-plot">{{movie.truncatedPlot}}</p>
+                                <p v-else class="movie-plot">{{movie.plot}}</p>
+                            </li>
 
-            </ul><!-- Outer Movie List END-->            
+                        </ul><!-- Movie Data END-->
+                    </li><!-- Single Movie Card END-->
+
+                </ul><!-- Outer Movie List END-->    
+            </div><!-- Inner Main END-->
         </main>
 
     </div><!-- Root END -->

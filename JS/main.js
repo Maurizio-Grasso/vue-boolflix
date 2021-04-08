@@ -4,14 +4,13 @@ var app = new Vue ({
         userInput : '' ,
         movieList : [] ,
         apiKey : '37e7aa1edd3103b63a7d7516fa1047f8' ,
-        typeOfContent : ['movie' , 'tv'] ,
-        debugArray : []
+        typeOfContent : ['movie' , 'tv']
     } ,
     methods : {
         searchTitle(category, query) {
         // Questo metodo effettua una ricerca in base all'input dell'utente ('category') e della categoria di contenuto ('query') passati come argomento
-        
-        this.userInput = '';    // Reset UserInput (si lavora sulla 'query')
+        this.movieList = [] ,
+        this.userInput = '';    // Reset UserInput (si lavora sulla sua copia 'query')
 
         if(category == 'all') {
             // Se la categoria passata come argomento è 'all', invoca nuovamente la funzione per ciascun tipo di contenuto ('movie'e 'tv')
@@ -21,18 +20,17 @@ var app = new Vue ({
         }
 
         else {
+            // Se come argomento è stato passato un tipo di contenuto conosciuto
             axios.get(`https://api.themoviedb.org/3/search/${category}` ,
             { params: {
                 api_key : this.apiKey ,
                 query : query ,
                 language : 'it-IT' ,
-                page : 1    // Ma tutte le altre pagine che fine fanno?
+                page : 1    // (Ma tutte le altre pagine che fine fanno?)
             }
             })
                 .then( (response) =>  {
                 response.data.results.forEach((movie) => {
-                //  Per ogni titolo restituito tramie API lancia il metodo addItem
-                    this.addItem(movie , category);
                     this.getDetails(movie.id , category);
                 });
             });
@@ -40,37 +38,50 @@ var app = new Vue ({
         } ,
 
         getDetails(id , category) {
-            // Passati come parametri l'id e la category di un titolo, questo metodo ne estrapola tutti i dettagli tramite API
+            // Passati come parametri l'id e la category di un titolo, questo metodo fa un ulteriore chiamata API
+            // Per ottenerne dettagli più approfonditi rispetto a quelli forniti dalla chiamata precedente
             axios.get(`https://api.themoviedb.org/3/${category}/${id}` ,
             { params: {
                 api_key : this.apiKey ,
-                language : 'it-IT' ,             
+                language : 'it-IT' ,          
                 }
             })
             .then( (response) =>  {
+                // Ottenuti i dettagli del film li passiamo (ancora grezzi) al metodo addNewItem()
                 this.addNewItem(response.data , category);
                 });
             } ,
 
         addNewItem(data , category) {
-            //  Passato come parametro l'oggetto che corrisponde ad un film e la catagory di appartenenza
-            //  Questo metodo estrapola tutti i dettagli utili per la webApp
+            //  Passato come parametro l'oggetto contenente i dettagli di un film e la catagoria di appartenenza
+            //  Questo metodo estrapola tutti i dettagli utili per la webApp, li rende omogenei e li inserisce nell'array
+            
             var newItem;
             
             //  Punteggio:
             newItem = {rating : Math.ceil(data.vote_average / 2)};  
 
             // Trama:
-            // newItem.plot = data.overview;
-
+            newItem.plot = data.overview;
+            
+            if(newItem.plot.length > 400) {
+                //  Se la trama supera i 400 caratteri ne creiamo anche una versione tagliata
+                newItem.truncatedPlot = newItem.plot.substring(0, 400) + '...';
+            }
+            
             //  Poster
-
             if(data.poster_path == null){
                 newItem.poster_path = 'img/image-placeholder.png';
             }
             else {
                 newItem.poster_path = `https://image.tmdb.org/t/p/w342${data.poster_path}`;
             }
+
+            //  Flag
+            newItem.flagLink = false;   // Per ora mi limito ad aggiungere la proprietà. 
+
+                // Alcune proprietà possiedono nomi diversi a seconda che si tratti di 'movie' o 'tv'. 
+                // Diversifico quindi attraverso un if
 
             if (category == 'tv') {
             //  Titolo (Serie TV) 
@@ -79,130 +90,65 @@ var app = new Vue ({
                 newItem.original_title = data.original_name;
             //  Paese (Serie TV)
                 if(data.origin_country.length > 0) {
+                    // Se esiste la proprietà origin_country ben venga
                    newItem.country = data.origin_country[0];
                 }
+                else if(data.original_language) {
+                    // Se non esiste origin_country prendo per buonna la original_language
+                    newItem.country = data.original_language;
+                }
                 else {
+                    // Se non c'è né l'una né l'altra mi attacco al
                    newItem.country = false;
                 }
             }
-            else {
+            else if (category == 'movie'){
             //  Titolo (Film)             
                 newItem.title = data.title;
             //  Titolo Orginale (Film)                             
                 newItem.original_title = data.original_title;
             // Paese (Film)          
                 if(data.production_countries.length > 0) {
+                    // Se esiste la proprietà production_countries ben venga
                     newItem.country = data.production_countries[0].iso_3166_1;
                 }
+                else if(data.original_language) {
+                    // Se non esiste production_countries prendo per buonna la original_language
+                    newItem.country = data.original_language;
+                }
                 else {
+                    // Se non c'è né l'una né l'altra mi attacco al
                     newItem.country = false;
                 }
             }
             
-            //  Flag
+            this.movieList.push(newItem);   // aggiungo il nuovo elemento all'array
             
             if(newItem.country) {
-               newItem.flagLink = '';
-               newItem.flagLink = this.getFlagLink(newItem.country);    // Non funziona
-            }
-
-            // console.log(newItem);
-            this.debugArray.push(newItem);
+                //  Se siamo riusciti a ricavare il Paese di origine, generiamo la bandierina corrispondente
+                this.getFlagLink(this.movieList.length - 1);
+            }            
         } ,
 
-        getFlagLink(langString) {
-            // Passata una stringa come parametro questo metodo restituisce il link alla bandiera corrispondente
-            // O quantomeno questa era l'idea.
+        getFlagLink(index) {
+            // Passata una stringa come parametro questo metodo cerca un link alla bandiera corrispondente
+            // Attraverso una chiamata API al servizio RestCountries (che ringraziamo)
 
-            var tmpFlagLink = '';
+            var langString = this.movieList[index].country
 
-            axios.get('https://restcountries.eu/rest/v2/alpha/'+langString).then( (response) =>  {
-                tmpFlagLink = response.data.flag;
-                console.log(tmpFlagLink);   //qui la vede
-            }).catch( (error) => {
-                console.log('Bandierina non trovata: '+ error);
-              });
-              
-              console.log(tmpFlagLink);     //qui non la vede
-
-              return tmpFlagLink;
-
-        } ,
-
-        addItem(movie , category) { //  ! Metodo deprecato. Sarà sostituito da addNewItem() (quando funizionerà)
-
-        //  Questo medodo si occupa di aggiungere all'array principale un singolo titolo
-        //  l'argomento 'movie' contiene i dati ancora grezzi passati dalle API
-        //  l'argomento 'category' può essere uguale a 'movie' o 'tv' a seconda che si tratti di film o serie TV
-            
-            var newMovie;   // Dichiaro variabile che conterrà l'oggetto temporaneo
-
-            newMovie = {rating : Math.ceil(movie.vote_average / 2)};    // trasformo il voto in un valore intero da 1 a 5
-            newMovie.flagLink = ''; // Inizializzo anche il link alla bandierina, che sarà ricavato in seguito
-            newMovie.plot = movie.overview;
-            
-            if(newMovie.plot.length > 400) {
-                //  Se la trama supera i 400 caratteri ne creo una versione tagliata, per evitare di mandare in overflow il suo box
-                newMovie.truncatedPlot = newMovie.plot.substring(0, 400) + '...';
-            }
-            if(movie.poster_path == null){
-                // Se non viene fornito un poster tramite API
-                newMovie.poster_path = 'img/image-placeholder.png';
-            }
-            else {
-                //... in caso contrario
-                newMovie.poster_path = `https://image.tmdb.org/t/p/w342${movie.poster_path}`;
-            }
-
-            if (category == 'tv') {
-                // Se stiamo lavorando sul titolo di una Serie TV
-                newMovie.title = movie.name;
-                newMovie.original_title = movie.original_name;
-                if (movie.origin_country.length > 0) {
-                    // Se l'array 'origin_country' contiene informazioni prendo per buono il primo elemento
-                    newMovie.country = movie.origin_country[0];
-                }
-                else{
-                    // Se come spesso avviene l'array è vuoto, ripiego invece sulla lingua originale
-                    newMovie.country = movie.original_language;
-                }
-            }
-            else {
-                // Se stiamo lavorando su un film (category == 'movie')
-                newMovie.title = movie.title;
-                newMovie.original_title = movie.original_title;
-                // Per i film, le API non indicano il paese di origine
-                // Devo arrangiarmi col campo 'lingua originale', benché questo dato sia spesso ambiguo
-                newMovie.country = movie.original_language;
-            }
-
-            // Che si tratti di un film o di una serie, i dati sono adesso omogenei
-
-            this.movieList.push(newMovie);  // Aggiungo il titolo all'array principale
-            this.getFlag(this.movieList.length - 1);    // aggiungo bandiera all'ultimo elemento
-        },
-
-        getFlag(index) {    //  !   Metodo deprecato. Sarà sostituito da getFlagLink() (quando funzionerà)
-
-        //  Questo metodo si occupa di ricavare il link ad una bandierina che corrisponde al Paese di origine del titolo
-        //  Oppure coerente con la sua lingua originale (nel caso in cui il Paese di origine fosse ignoto)
-
-            var langString = this.movieList[index].country;
-
-            if((langString == 'en') || (langString == 'EN')) {
-                // 'EN' non corrisponde ad un Paese specifico ma è la lingua più frequente
-                //  Gestisco questo caso separatamente con una bandierina a metà fra quella inglese e quella statunitense
+            if((langString == 'en') || ((langString == 'EN'))) {
+                //  Se la stringa è 'en' inserisco manualmente una bandierina a metà inglese e statunitense
                 this.movieList[index].flagLink = "https://upload.wikimedia.org/wikipedia/commons/a/a6/Us-uk.svg";
             }
-            else {
-                //  ...altrimenti Cerco il link alla bandierina tramite il servizio RestCountries:
+            else if(langString != false) {            
                 axios.get('https://restcountries.eu/rest/v2/alpha/'+langString).then( (response) =>  {
                     this.movieList[index].flagLink = response.data.flag;
-                }).catch( (error) => {  // Se la bandierina non si trova...
+                }).catch( (error) => {
+                    // Se non trovo nessuna bandierina
                     console.log('Bandierina non trovata: '+ error);
-                    this.movieList[index].flagLink = false;
-                  });
+                });
             }
-        }
+        } ,
+
     }
 });

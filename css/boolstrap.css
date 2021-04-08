@@ -184,6 +184,7 @@ Utilities
 .text-right {    text-align: right; }
 
 .text-smaller {    font-size: .85em; }
+.text-bigger {    font-size: 1.5em; }
 
 .text-uppercase { text-transform: uppercase;}
 .text-capitalized { text-transform: capitalize;}
