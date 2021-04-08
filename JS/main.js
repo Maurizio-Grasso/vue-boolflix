@@ -1,46 +1,140 @@
 var app = new Vue ({
     el : '#root' ,
     data : {
-        userQuery : '' ,
+        userInput : '' ,
         movieList : [] ,
-        apiKey : '37e7aa1edd3103b63a7d7516fa1047f8'
+        apiKey : '37e7aa1edd3103b63a7d7516fa1047f8' ,
+        typeOfContent : ['movie' , 'tv'] ,
+        debugArray : []
     } ,
     methods : {
-        searchTitle(category) {
-        // Questo metodo effettua una ricerca in base alla query inserita dall'utente
-        // il parametro 'category' può essere uguale a 'movie' nel caso di film o 'tv' nel caso di serie televisive
-            axios.get(`https://api.themoviedb.org/3/search/${category}` ,
-                { params: {
-                    api_key : this.apiKey ,
-                    query : this.userQuery ,
-                    language : 'it-IT' ,
-                    page : 1    // Ma tutte le altre pagine che fine fanno?
-                    }
-                })
-                .then( (response) =>  {
-                    response.data.results.forEach((movie) => {
-                        //  Per ogni titolo restituito tramie API lancia il metodo addItem
-                        //  il quale  si occupa di inserirne i relativi dati nell'array
-                        this.addItem(movie , category);
-                    });
-                });
+        searchTitle(category, query) {
+        // Questo metodo effettua una ricerca in base all'input dell'utente ('category') e della categoria di contenuto ('query') passati come argomento
+        
+        this.userInput = '';    // Reset UserInput (si lavora sulla 'query')
 
-                if(category == 'movie') {
-                    // Se la categoria sulla quale abbiamo lavorato è 'movie'
-                    // Richiama ricorsivamente la funzione passando come argomento 'tv'
-                    // Così da ripetere la stessa ricerca anche per le serie televisive
-                    this.searchTitle('tv');
+        if(category == 'all') {
+            // Se la categoria passata come argomento è 'all', invoca nuovamente la funzione per ciascun tipo di contenuto ('movie'e 'tv')
+            for(type in this.typeOfContent) {
+                this.searchTitle(this.typeOfContent[type] , query);
+            }
+        }
+
+        else {
+            axios.get(`https://api.themoviedb.org/3/search/${category}` ,
+            { params: {
+                api_key : this.apiKey ,
+                query : query ,
+                language : 'it-IT' ,
+                page : 1    // Ma tutte le altre pagine che fine fanno?
+            }
+            })
+                .then( (response) =>  {
+                response.data.results.forEach((movie) => {
+                //  Per ogni titolo restituito tramie API lancia il metodo addItem
+                    this.addItem(movie , category);
+                    this.getDetails(movie.id , category);
+                });
+            });
+            }            
+        } ,
+
+        getDetails(id , category) {
+            // Passati come parametri l'id e la category di un titolo, questo metodo ne estrapola tutti i dettagli tramite API
+            axios.get(`https://api.themoviedb.org/3/${category}/${id}` ,
+            { params: {
+                api_key : this.apiKey ,
+                language : 'it-IT' ,             
                 }
-                else {
-                    this.userQuery = '';
-                }
+            })
+            .then( (response) =>  {
+                this.addNewItem(response.data , category);
+                });
             } ,
 
-        addItem(movie , category) {
+        addNewItem(data , category) {
+            //  Passato come parametro l'oggetto che corrisponde ad un film e la catagory di appartenenza
+            //  Questo metodo estrapola tutti i dettagli utili per la webApp
+            var newItem;
+            
+            //  Punteggio:
+            newItem = {rating : Math.ceil(data.vote_average / 2)};  
+
+            // Trama:
+            // newItem.plot = data.overview;
+
+            //  Poster
+
+            if(data.poster_path == null){
+                newItem.poster_path = 'img/image-placeholder.png';
+            }
+            else {
+                newItem.poster_path = `https://image.tmdb.org/t/p/w342${data.poster_path}`;
+            }
+
+            if (category == 'tv') {
+            //  Titolo (Serie TV) 
+                newItem.title = data.name;
+            //  Titolo Originale (Serie TV) 
+                newItem.original_title = data.original_name;
+            //  Paese (Serie TV)
+                if(data.origin_country.length > 0) {
+                   newItem.country = data.origin_country[0];
+                }
+                else {
+                   newItem.country = false;
+                }
+            }
+            else {
+            //  Titolo (Film)             
+                newItem.title = data.title;
+            //  Titolo Orginale (Film)                             
+                newItem.original_title = data.original_title;
+            // Paese (Film)          
+                if(data.production_countries.length > 0) {
+                    newItem.country = data.production_countries[0].iso_3166_1;
+                }
+                else {
+                    newItem.country = false;
+                }
+            }
+            
+            //  Flag
+            
+            if(newItem.country) {
+               newItem.flagLink = '';
+               newItem.flagLink = this.getFlagLink(newItem.country);    // Non funziona
+            }
+
+            // console.log(newItem);
+            this.debugArray.push(newItem);
+        } ,
+
+        getFlagLink(langString) {
+            // Passata una stringa come parametro questo metodo restituisce il link alla bandiera corrispondente
+            // O quantomeno questa era l'idea.
+
+            var tmpFlagLink = '';
+
+            axios.get('https://restcountries.eu/rest/v2/alpha/'+langString).then( (response) =>  {
+                tmpFlagLink = response.data.flag;
+                console.log(tmpFlagLink);   //qui la vede
+            }).catch( (error) => {
+                console.log('Bandierina non trovata: '+ error);
+              });
+              
+              console.log(tmpFlagLink);     //qui non la vede
+
+              return tmpFlagLink;
+
+        } ,
+
+        addItem(movie , category) { //  ! Metodo deprecato. Sarà sostituito da addNewItem() (quando funizionerà)
+
         //  Questo medodo si occupa di aggiungere all'array principale un singolo titolo
         //  l'argomento 'movie' contiene i dati ancora grezzi passati dalle API
         //  l'argomento 'category' può essere uguale a 'movie' o 'tv' a seconda che si tratti di film o serie TV
-
+            
             var newMovie;   // Dichiaro variabile che conterrà l'oggetto temporaneo
 
             newMovie = {rating : Math.ceil(movie.vote_average / 2)};    // trasformo il voto in un valore intero da 1 a 5
@@ -88,7 +182,8 @@ var app = new Vue ({
             this.getFlag(this.movieList.length - 1);    // aggiungo bandiera all'ultimo elemento
         },
 
-        getFlag(index) {
+        getFlag(index) {    //  !   Metodo deprecato. Sarà sostituito da getFlagLink() (quando funzionerà)
+
         //  Questo metodo si occupa di ricavare il link ad una bandierina che corrisponde al Paese di origine del titolo
         //  Oppure coerente con la sua lingua originale (nel caso in cui il Paese di origine fosse ignoto)
 

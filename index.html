@@ -35,8 +35,8 @@
 
             <div class="outer-search-form">
                 <label for="search-title"></label>
-                <input v-model="userQuery" @keyup.13="searchTitle('movie')" type="text" id="search-title">
-                <button @click="searchTitle('movie')" >Cerca</button>
+                <input v-model="userInput" @keyup.13="searchTitle('all' , userInput)" type="text" id="search-title">
+                <button @click="searchTitle('all' , userInput)" >Cerca</button>
             </div>
             
 
