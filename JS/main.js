@@ -3,6 +3,7 @@ var app = new Vue ({
     data : {
         userInput : '' ,
         movieList : [] ,
+        genreList : [] ,
         apiKey : '37e7aa1edd3103b63a7d7516fa1047f8' ,
         typeOfContent : ['movie' , 'tv']
     } ,
@@ -61,12 +62,32 @@ var app = new Vue ({
             //  Punteggio:
             newItem = {rating : Math.ceil(data.vote_average / 2)};  
 
+            
+            //  Flag
+            newItem.flagLink = false;   // Per ora mi limito ad aggiungere la proprietà. 
+            
+            //  Cast
+            newItem.cast = false;          // Per ora mi limito ad aggiungere la proprietà. 
+            
+            // Genre
+            newItem.genres = false;
+            
+            if(data.genres.length > 0) {
+                newItem.genres = [];
+                for(genre in data.genres) {
+                    newItem.genres.push(data.genres[genre].name);
+                    if(!this.genreList.includes(data.genres[genre].name)) {
+                        this.genreList.push(data.genres[genre].name);
+                    }
+                }
+            }
+            
             // Trama:
             newItem.plot = data.overview;
             
-            if(newItem.plot.length > 400) {
-                //  Se la trama supera i 400 caratteri ne creiamo anche una versione tagliata
-                newItem.truncatedPlot = newItem.plot.substring(0, 400) + '...';
+            if(newItem.plot.length > 350) {
+                //  Se la trama supera i 350 caratteri ne creiamo anche una versione tagliata
+                newItem.truncatedPlot = newItem.plot.substring(0, 350) + '...';
             }
             
             //  Poster
@@ -76,9 +97,6 @@ var app = new Vue ({
             else {
                 newItem.poster_path = `https://image.tmdb.org/t/p/w342${data.poster_path}`;
             }
-
-            //  Flag
-            newItem.flagLink = false;   // Per ora mi limito ad aggiungere la proprietà. 
 
                 // Alcune proprietà possiedono nomi diversi a seconda che si tratti di 'movie' o 'tv'. 
                 // Diversifico quindi attraverso un if
@@ -127,8 +145,29 @@ var app = new Vue ({
             if(newItem.country) {
                 //  Se siamo riusciti a ricavare il Paese di origine, generiamo la bandierina corrispondente
                 this.getFlagLink(this.movieList.length - 1);
-            }            
+            }
+            
+            this.getCast(data.id , category , this.movieList.length - 1);
         } ,
+
+        getCast(movieId , category , index){
+            axios.get(`https://api.themoviedb.org/3/${category}/${movieId}/credits` ,
+            { params: {
+                api_key : this.apiKey ,
+                language : 'it-IT'
+            }
+            })
+                .then( (response) =>  {
+                    let cast = [];
+                    console.log(response.data.cast);
+                    while( (cast.length < 5) && (cast.length < response.data.cast.length) ) {
+                        cast.push(response.data.cast[cast.length].name);
+                    }
+                    if (cast.length > 0) {
+                        this.movieList[index].cast = cast;
+                    }
+             });
+        },
 
         getFlagLink(index) {
             // Passata una stringa come parametro questo metodo cerca un link alla bandiera corrispondente

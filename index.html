@@ -86,11 +86,29 @@
                             
                             <li class="margin-b-more"> 
                                 <img class="movie-country-flag float-right margin-l-standard" v-if="(movie.flagLink)" :src="movie.flagLink" alt="flag"> 
-                                <span class="movie-title"><strong>Titolo</strong>: {{movie.title}}</span>
+                                <span class="movie-title margin-r-more"><strong>Titolo</strong>:</span> <span>{{movie.title}}</span>
                             </li>
 
                             <li v-if="(movie.title != movie.original_title)" class="margin-b-more">
-                                <span class="single-movie-original-title"><strong>Titolo Originale</strong>: {{movie.original_title}} </span>
+                                <span class="single-movie-original-title margin-r-more"><strong>Titolo Originale</strong>:</span><span>{{movie.original_title}} </span>
+                            </li>
+
+                            <li 
+                            v-if="movie.cast" 
+                            class="margin-b-more">
+                                <span class="margin-r-more"><strong>Cast</strong>:</span>
+                                <span 
+                                    v-for="actor in movie.cast"
+                                    class="margin-r-standard"
+                                    > {{ actor }} </span>
+                            </li>
+
+                            <li class="margin-b-more" v-if="movie.genres">
+                                <span class="margin-r-standard"><strong>Genere</strong>:</span>
+                                <span 
+                                    v-for="genre in movie.genres"
+                                    class="margin-r-standard"
+                                    >{{genre}} </span>
                             </li>
 
                             <li class="movie-rating margin-b-more" v-if="movie.rating != 0">
@@ -98,8 +116,8 @@
                             </li>
                             
                             <li v-if="(movie.plot)" class="movie-plot-container">
-                                <p v-if="(movie.truncatedPlot)" class="movie-plot">{{movie.truncatedPlot}}</p>
-                                <p v-else class="movie-plot">{{movie.plot}}</p>
+                                <p v-if="(movie.truncatedPlot)" class="movie-plot"> <span class="margin-r-standard"><strong>Trama</strong>:</span> {{movie.truncatedPlot}}</p>
+                                <p v-else class="movie-plot"><span class="margin-r-standard"><strong>Trama</strong>:</span>{{movie.plot}}</p>
                             </li>
 
                         </ul><!-- Movie Data END-->
