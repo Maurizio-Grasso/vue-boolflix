@@ -4,8 +4,13 @@ var app = new Vue ({
         userInput : '' ,
         movieList : [] ,
         genreList : [] ,
-        apiKey : '37e7aa1edd3103b63a7d7516fa1047f8' ,
-        typeOfContent : ['movie' , 'tv']
+        noGenre   : 'Genere Non Disponibile',
+        filterBoxIsOpen : false ,
+        typeOfContent : ['movie' , 'tv'] ,
+        apiKey : '37e7aa1edd3103b63a7d7516fa1047f8' 
+    } ,
+    mounted() {
+        this.genreList.push({name : this.noGenre , selected : true});
     } ,
     methods : {
         searchTitle(category, query) {
@@ -57,67 +62,49 @@ var app = new Vue ({
             //  Passato come parametro l'oggetto contenente i dettagli di un film e la catagoria di appartenenza
             //  Questo metodo estrapola tutti i dettagli utili per la webApp, li rende omogenei e li inserisce nell'array
             
-            var newItem;
+            var newItem = {
+                rating : Math.ceil(data.vote_average / 2) ,
+                flagLink : false ,
+                cast : false ,
+                genres : [] ,
+                country : false ,
+                poster_path : 'img/image-placeholder.png'
+            };  
             
-            //  Punteggio:
-            newItem = {rating : Math.ceil(data.vote_average / 2)};  
+            //  Genre
 
-            
-            //  Flag
-            newItem.flagLink = false;   // Per ora mi limito ad aggiungere la proprietà. 
-            
-            //  Cast
-            newItem.cast = false;          // Per ora mi limito ad aggiungere la proprietà. 
-            
-            // Genre
-            newItem.genres = false;
-            
-            if(data.genres.length > 0) {
-                newItem.genres = [];
-                for(genre in data.genres) {
-                    newItem.genres.push(data.genres[genre].name);
-                    if(!this.genreList.includes(data.genres[genre].name)) {
-                        this.genreList.push(data.genres[genre].name);
-                    }
-                }
+            if(data.genres.length > 0) {                
+                data.genres.forEach(genre => {     
+                    newItem.genres.push(genre.name);
+                    this.addNewGenre(genre.name);
+                });               
             }
-            
-            // Trama:
-            newItem.plot = data.overview;
-            
-            if(newItem.plot.length > 350) {
-                //  Se la trama supera i 350 caratteri ne creiamo anche una versione tagliata
-                newItem.truncatedPlot = newItem.plot.substring(0, 350) + '...';
+            else {
+                newItem.genres.push(this.noGenre);
             }
             
             //  Poster
-            if(data.poster_path == null){
-                newItem.poster_path = 'img/image-placeholder.png';
-            }
-            else {
+
+            if(data.poster_path){
                 newItem.poster_path = `https://image.tmdb.org/t/p/w342${data.poster_path}`;
             }
 
+            // Trama:
+
+            newItem.plot = data.overview;
+
                 // Alcune proprietà possiedono nomi diversi a seconda che si tratti di 'movie' o 'tv'. 
-                // Diversifico quindi attraverso un if
+                // Gestisco quindi i due casi separatamente attraverso un if
 
             if (category == 'tv') {
             //  Titolo (Serie TV) 
                 newItem.title = data.name;
             //  Titolo Originale (Serie TV) 
                 newItem.original_title = data.original_name;
+
             //  Paese (Serie TV)
                 if(data.origin_country.length > 0) {
-                    // Se esiste la proprietà origin_country ben venga
                    newItem.country = data.origin_country[0];
-                }
-                else if(data.original_language) {
-                    // Se non esiste origin_country prendo per buonna la original_language
-                    newItem.country = data.original_language;
-                }
-                else {
-                    // Se non c'è né l'una né l'altra mi attacco al
-                   newItem.country = false;
                 }
             }
             else if (category == 'movie'){
@@ -127,17 +114,16 @@ var app = new Vue ({
                 newItem.original_title = data.original_title;
             // Paese (Film)          
                 if(data.production_countries.length > 0) {
-                    // Se esiste la proprietà production_countries ben venga
                     newItem.country = data.production_countries[0].iso_3166_1;
-                }
-                else if(data.original_language) {
-                    // Se non esiste production_countries prendo per buonna la original_language
-                    newItem.country = data.original_language;
-                }
-                else {
-                    // Se non c'è né l'una né l'altra mi attacco al
-                    newItem.country = false;
-                }
+                }           
+            }
+
+            if(newItem.country == false) {
+                // Se non sono riuscito a ricavare il paese di origine (perché non comunicato dall'API)
+                // Allora tento di risalirvi dalla sua lingua originale, qualora presente
+                if(data.original_language) {
+                        newItem.country = data.original_language;
+                    }
             }
             
             this.movieList.push(newItem);   // aggiungo il nuovo elemento all'array
@@ -150,6 +136,48 @@ var app = new Vue ({
             this.getCast(data.id , category , this.movieList.length - 1);
         } ,
 
+        toggleFilterBox() {
+            this.filterBoxIsOpen = this.filterBoxIsOpen == true ? false : true;
+        } ,
+
+        hasSelectedGenre(movie) {        
+                for(var index in movie.genres) {
+                    var currentGenre = movie.genres[index];
+            
+                    for(var genre in this.genreList) {
+                        if((this.genreList[genre].name == currentGenre) && (this.genreList[genre].selected) ) {
+                        return true;
+                        }
+                    }
+                }
+
+            return false;
+        } ,
+
+        resetSelectedGenres() {
+            for(var genre in this.genreList) {
+                this.genreList[genre].selected = true;
+                }
+        } ,
+
+        addNewGenre(currentGenre) {
+
+            var foundNew = true;
+
+            this.genreList.forEach(genre => {        
+                if(genre.name == currentGenre){
+                    foundNew = false;
+                }
+            });            
+
+            if( foundNew == true ) {
+                this.genreList.push({ 
+                    'name' : currentGenre , 
+                    'selected' : true
+                });
+            }
+        } ,
+
         getCast(movieId , category , index){
             axios.get(`https://api.themoviedb.org/3/${category}/${movieId}/credits` ,
             { params: {
@@ -159,7 +187,6 @@ var app = new Vue ({
             })
                 .then( (response) =>  {
                     let cast = [];
-                    console.log(response.data.cast);
                     while( (cast.length < 5) && (cast.length < response.data.cast.length) ) {
                         cast.push(response.data.cast[cast.length].name);
                     }
@@ -189,5 +216,31 @@ var app = new Vue ({
             }
         } ,
 
-    }
+        printOverview(movie) {
+            //  Questo metodo si occupa di fornire una versione della trama di lunghezza 
+            //  adatta allo spazio disponibile nel box relativo al film
+
+            var plot = movie.plot;
+
+            if (plot == '') {
+                plot = 'Nessuna descrizione disponibile per questo titolo';
+            }
+            else {                
+                // Se la trama supera un determinato numero di caratteri ne stampo una versione 'tagliata'                
+                var maxPlotLength = 400;  // lunghezza massima ammessa
+                
+                if( (movie.rating) && (movie.genres) && (movie.cast) && (movie.title != movie.original_title) ) {
+                    // Se le condizioni sopra sono verificare, nel box rimarrà ancora meno spazio
+                    // La lunghezza massima della trama dovrà quindi essere particolarmente ridotta
+                    maxPlotLength = 200;
+                }
+                
+                if(movie.plot.length > maxPlotLength) {
+                    plot = plot.substring(0, maxPlotLength) + '...';
+                }                
+            }
+
+            return plot;
+        }
+     }
 });
