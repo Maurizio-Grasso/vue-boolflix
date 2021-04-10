@@ -35,22 +35,18 @@
                     <img src="img/logo-boolflix.png" alt="logo boolflix" class="header-logo">
                 </div>
                 
-                <nav class="header-menu-nav margin-l-more text-white text-capitalized container-fluid">
-                    <ul class="flex-container hide-on-mobile">
-                        <li class="margin-l-more">home</li>
-                        <li class="margin-l-more">serie TV</li>
-                        <li class="margin-l-more">Film</li>
-                        <li class="margin-l-more">Nuovi e popolari</li>
-                        <li class="margin-l-more">la mia lista</li>
+                <nav class="header-menu-nav text-capitalized">
+
+                    <ul class="flex-container hide-on-mobile margin-l-standard margin-r-standard">
+                        <li class="cursor-pointer margin-l-more">home</li>
+                        <li class="cursor-pointer margin-l-more">serie TV</li>
+                        <li class="cursor-pointer margin-l-more">Film</li>
                     </ul>
 
-                    <div class="outer-hamburger-menu hide-on-desktop margin-l-standard text-bigger">
+                    <div class="outer-hamburger-menu hide-on-desktop margin-l-standard margin-r-standard text-white">
                         <i class="text-bigger cursor-pointer fas fa-bars"></i>
                     </div>
 
-                </nav>
-
-                <nav class="header-menu-nav hide-on-desktop text-white">
                 </nav>
                 
                 <div class="outer-search-form flex-container">
@@ -70,38 +66,58 @@
 
                 </div><!-- Search Form Outer END -->
                 
-                <nav v-if="movieList.length>0" class="filter-container text-white">
+                <nav  class="filter-container">
 
-                    <div class="icon-filter-container cursor-pointer margin-l-more" @click="toggleFilterBox()">
-                        <span>Filtra Risultati</span><i  class="margin-l-standard fas fa-filter"></i>
+                    <div v-if="movieList.length>0" class="header-results-count text-white cursor-pointer margin-l-more text-right" @click="toggleFilterBox()">
+                        <span>Risultati: <span class="text-secondary">{{movieList.length}}</span> Visibili: <span class="text-secondary">{{visibleMovies}}</span><i  class="margin-l-standard fas fa-filter"></i></span>
                     </div>
 
-                    <div v-if="filterBoxIsOpen" class="filter-box-outer flex-container">
-                        <div class="filter-box-inner padding-more flex-container set-relative">
+                    <div v-if="filterBoxIsOpen" class="filter-box-outer full-screen-box-outer flex-container">
+                        <div class="filter-box-inner full-screen-box-inner padding-more flex-container set-relative">
                             
                             <div class="filter-by-genre">
                                 <h2 class="text-white margin-b-more">Filtra per Genere:</h2>
                                 <ul class="genre-list flex-container text-capitalized">
-                                    <li v-for="(genre , index) in genreList" class="margin-r-more">
-                                        <label :for="genre.name+'-checkbox-filter'">{{ genre.name }}</label>
-                                        <input v-model="genreList[index].selected" type="checkbox" :id="genre.name+'-checkbox-filter'" :name="genre+'-checkbox-filter'" class="margin-l-standard margin-b-more">   
-                                                    
-                                    </li>
-                                </ul>
-                            </div>
+
+                                    <li v-for="(genre , index) in genreList" 
+                                        class="margin-r-more">                                            
+
+                                            <label :for="genre.name+'-checkbox-filter'">{{ genre.name }}</label>
+
+                                            <input type="checkbox" 
+                                                    :id="genre.name+'-checkbox-filter'" 
+                                                    :name="genre+'-checkbox-filter'" 
+                                                    v-model="genreList[index].selected" 
+                                                    @change="filterByGenre()" 
+                                                    class="margin-l-standard margin-r-more margin-b-more" 
+                                                    checked>
+                                                                                                 
+                                    </li><!-- Single Genre END -->
+
+                                </ul><!-- Genre List END-->
+
+                            </div><!-- Filter by Genre Box END -->
 
                             <div class="button-container flex-container">
-                                <button @click="toggleFilterBox()" class="padding-t-standard padding-b-standard padding-l-more padding-r-more">Applica Filtri</button>
-                                <span class="close-icon cursor-pointer" @click="toggleFilterBox()"><i class="fas fa-times"></i></span>
-                                <button @click="resetSelectedGenres()" class="padding-t-standard padding-b-standard padding-l-more padding-r-more">Cancella Tutto</button>
-                            </div>
+
+                                <button @click="toggleFilterBox()" 
+                                        class="padding-t-standard padding-b-standard padding-l-more padding-r-more margin-b-more margin-r-standard">Applica Filtri</button>
+
+                                <span class="close-icon cursor-pointer" 
+                                      @click="toggleFilterBox()">
+                                        <i class="fas fa-times"></i>
+                                </span>
+
+                                <button @click="resetSelectedGenres()" 
+                                        class="padding-t-standard padding-b-standard padding-l-more padding-r-more margin-b-more margin-l-standard">Cancella Tutto</button>
+
+                            </div><!-- Button Container END-->
                                 
-                        </div>
+                        </div><!-- Filter Box Inner END-->
 
+                    </div><!-- Filter Box Outer END-->
 
-                    </div>
-
-                </nav>
+                </nav>  <!-- Filter Container END-->
 
             </div><!-- Inner Header END -->
 
@@ -109,68 +125,99 @@
             
         <main class="main">            
             <div class="inner-main inner-wrapper">
-                <ul class="movie-list flex-container inline-list">
 
-                    <li v-for="(movie , index) in movieList" v-if="hasSelectedGenre(movie)" class="single-movie-box  set-relative margin-standard">
+                <div v-if="visibleMovies === 0" class="no-results search-results flex-container padding-standard">
+                    <h2 class="text-white text-center margin-b-more">Nessun risultato disponibile</h2>
+                    <p class="margin-t-more">Prova a cambiare i termini di ricerca o a rimuovere i filtri.</p>
+                </div>
+
+                <div v-if="visibleMovies === false" class="no-results search-results flex-container padding-standard">
+                    <h2 class="text-white text-center margin-b-more">Prova a Cercare Qualcosa...</h2>
+                    <p class="margin-t-more">Quando cercherai un film o una serie TV i risultati compariranno qui.</p>
+                </div>
+
+                <ul v-else class="search-results flex-container">
+
+                    <li v-for="(movie , index) in movieList" 
+                        v-if="movie.visible == true"
+                        class="single-movie-box  set-relative margin-standard">
+                                                
+                        <img :src="movie.poster_path" 
+                             :alt="movie.title" 
+                              class="movie-poster">
                         
-                        <img :src="movie.poster_path" :alt="movie.title" class="movie-poster">
-
                         <ul class="movie-data flex-container padding-standard">
                             
                             <!-- Title and Country -->
-
+                            
                             <li class="margin-b-more"> 
                                 <img class="movie-country-flag float-right margin-l-standard" v-if="(movie.flagLink)" :src="movie.flagLink" alt="flag"> 
                                 <span class="margin-r-standard text-white"><strong>Titolo</strong>:</span> <span>{{movie.title}}</span>
                             </li>
-
+                            
                             <!-- Original Title -->
-
+                            
                             <li v-if="(movie.title != movie.original_title)" class="margin-b-more">
                                 <span class="margin-r-standard text-white"><strong>Titolo Originale</strong>:</span><span>{{movie.original_title}} </span>
                             </li>
-
+                            
                             <!-- Movie Cast -->
-
+                            
                             <li v-if="movie.cast" class="margin-b-more">
                                 <span class="margin-r-standard text-white"><strong>Cast</strong>:</span>
                                 <ul class="movie-cast-list inline-list">
                                     <li v-for="actor in movie.cast">{{ actor }}</li>
                                 </ul>
                             </li>
-
+                            
                             <!-- Movie Genres -->
-
-                            <li v-if="movie.genres[0] != noGenre " class="margin-b-more">
+                            
+                            <li v-if="movie.genres[0] != 'Genere Non Disponibile' " class="margin-b-more">
                                 <span class="margin-r-standard text-white"><strong>Genere</strong>:</span>
                                 <ul class="movie-genres-list inline-list">
                                     <li v-for="genre in movie.genres">{{genre}}</li>
                                 </ul>
                             </li>
-
+                            
                             <!-- Movie Rating -->
-
+                            
                             <li v-if="movie.rating != 0" class="margin-b-more">
                                 <span class="margin-r-standard text-white"><strong>Voto</strong>:</span>
                                 <span class="movie-rating">
                                     <i v-for="rate in movie.rating" class="fas fa-star"></i><i v-for="rate in (5 - movie.rating)" class="far fa-star"></i>
                                 </span>
                             </li>
-
+                            
                             <!-- Movie Overview -->
-
-                            <!-- <li v-if="(movie.plot)" class="movie-plot-container"> -->
+                            
                             <li class="movie-plot-container">
                                 <p class="movie-plot">
-                                    <span class="margin-r-standard text-white"><strong>Trama</strong>:
+                                    <span class="margin-r-standard text-white"><strong>Trama</strong>:</span>
                                     <span>{{printOverview(movie)}}</span>
-                                </p>
+                                    <span v-if="( printOverview(movie) != movie.plot) && (printOverview(movie) != noPlotFound)"
+                                    class="cursor-pointer text-secondary" 
+                                    @click="showFullPlot(index)">Leggi Tutto
+                                    </span>
+                                </p>                          
                             </li>
-
+                                                
+                            
+                            
                         </ul><!-- Movie Data END-->
+                        
                     </li><!-- Single Movie Card END-->
+                    
+                    <!-- Extended Plot On Fullscreen Box -->
+                    <li v-if="fullPlotBox.shown" class="full-screen-box-outer flex-container">
+                        <div class="full-screen-box-inner set-relative padding-more">
+                            <p class="padding-more">{{ movieList[fullPlotBox.index].plot }}</p>
+                            <span class="close-icon cursor-pointer" @click="hideFullPlot()"><i class="fas fa-times"></i></span>   
+                        </div>
+                    </li><!-- Fullscreen Box END-->
 
-                </ul><!-- Outer Movie List END-->    
+                </ul><!-- Outer Movie List END-->
+                
+
             </div><!-- Inner Main END-->
         </main>
 

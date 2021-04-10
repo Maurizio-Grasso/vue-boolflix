@@ -12,6 +12,7 @@ Reset & Defaults
 :root {
     font-size: 62.5%; 
     --color-primary: orange;
+    --color-secondary: lightskyblue;
     --spacing-standard: 1rem;
     --spacing-more: calc( var(--spacing-standard) * 2 );
 }
@@ -190,6 +191,7 @@ Utilities
 .text-capitalized { text-transform: capitalize;}
 
 .text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
 .text-white { color: white; }
 .text-black { color: black; }
 
